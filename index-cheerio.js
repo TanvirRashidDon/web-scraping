@@ -7,8 +7,6 @@ const json2csv = require("json2csv").Parser;
 
 const initialUrl = 'https://www.imdb.com/title/tt0111161/?ref_=adv_li_tt';
 
-
-
 /**
 * Create header object.
 *
@@ -69,7 +67,7 @@ const writeInCSVFile = (inputJsonObject, pathToWrite) => {
 
 
 
-// Scripte starts here
+// run with command $ node index-cheerio.js
 (async () => {
     let parsedData = [];
     const fileToWrite = "./data.csv";
