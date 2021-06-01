@@ -21,3 +21,7 @@ Install depenencies
 
 # Run scripy
 - `node index.js'
+
+
+# Deploy to cloud
+- set headless = true in browser.js file
