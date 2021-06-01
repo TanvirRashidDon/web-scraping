@@ -16,7 +16,7 @@ Get the project
 Install depenencies 
 
 - `npm install request-promise request cheerio json2csv`
-- `npm i puppeteer-core`
+- `npm install --save puppeteer`
 
 
 # Run scripy

@@ -1,4 +1,4 @@
-const pageScrapper = require("./pageScrapper");
+const pageScraper = require("./pageScraper");
 
 const scrapeAll = (browserInstance) => {
     let browser;
@@ -10,4 +10,4 @@ const scrapeAll = (browserInstance) => {
     }
 }
 
-module.exports = (browserInstance) => scrapeAll(browserInstance)
+module.exports = (browserInstance) => scrapeAll(browserInstance);
