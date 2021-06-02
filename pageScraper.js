@@ -3,27 +3,20 @@ const { Configuration } = require("./configuration");
 const scraperObject = {
     url: Configuration.initialURL,
     async scraper(browser){
-        let page = await browser.newPage();
-        console.log(`Navigating to initial url ${this.url}...`);
-        // Navigate to the selected page
-        await page.goto(this.url);
-
-        let scrapedData = [];
-
         const getAllItemURLFromAPage = async (url) => {
             // go to the page and wait till the loadin completed
             await page.goto(url);
             await page.waitForSelector('#main')
 
             let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
-                // add filter if any exist
+                // add filter if any exist (example below)
                 // links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
                 // Extract the links from the data
                 links = links.map(el => el.querySelector('h3 > a').href)
                 return links;
             });
 
-            //console.log(urls);
+            console.log(`Found ${urls.length} item in page: ${url}`);
             return urls;
         }
 
@@ -68,23 +61,11 @@ const scraperObject = {
         }
 
         const getTotalAdsCount = (items) => {
-            console.log("Item count for the initial URL: " + items.length)
+            console.log("\nItem count for the initial URL: " + items.length)
         }
 
-        const allPagesURLs = await getNextPageUrl(page, 10)
-        //console.log(allPagesURLs);
-        
-        const allItems = await addItems(allPagesURLs);
-        //console.log(allItems);
-
-        getTotalAdsCount(allItems);
-
-        const scrapeCarItem = async () => {
-
-            // Wait for the required DOM to be rendered
-            await page.waitForSelector('#main');
-
-            // Get the link to all the links
+        const scrapeCarItems = async (urls) => {
+            let scrapedData = [];
 
             let pagePromise = (link) => new Promise(async(resolve, reject) => {
                 let dataObj = {};
@@ -112,25 +93,35 @@ const scraperObject = {
                 await newPage.close();
             })
 
-            for(link in allUrls){
+            console.log(`\nScraping started...\n`)
+            for(link in urls) { // avoid loop with callbacks like forEach
                 let currentPageData = await pagePromise(urls[link]);
                 scrapedData.push(currentPageData);
                 // console.log(currentPageData);
             }
 
-            // When all the data on this page is done, click the next button and start the scraping of the next page
-            // You are going to check if this button exist first, so you know if there really is a next page.
-           
-            await page.close();
-
             return scrapedData;
         }
 
-     
-  
 
-        // let data = await scrapeCurrentPage();
-        // console.log(data);
+        // =================== Start Here =================
+        let page = await browser.newPage();
+        console.log(`Navigating to initial url ${this.url}\n`);
+        // Navigate to the selected page
+        await page.goto(this.url);
+
+        const allPagesURLs = await getNextPageUrl(page, 10)
+        //console.log(allPagesURLs);
+        
+        const allItems = await addItems(allPagesURLs);
+        //console.log(allItems);
+
+        getTotalAdsCount(allItems);
+
+        const scrapedData = await scrapeCarItems(allItems);
+        await page.close();
+
+        console.log(scrapedData);
         // return data;
     }
 }
