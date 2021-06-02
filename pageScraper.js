@@ -4,16 +4,16 @@ const scraperObject = {
     url: Configuration.initialURL,
     async scraper(browser){
         let page = await browser.newPage();
-        console.log(`Navigating to base url ${this.url}...`);
+        console.log(`Navigating to initial url ${this.url}...`);
         // Navigate to the selected page
         await page.goto(this.url);
 
         let scrapedData = [];
 
         const getAllItemURLFromAPage = async (url) => {
+            // go to the page and wait till the loadin completed
             await page.goto(url);
-
-            let item = await page.waitForSelector('#main')
+            await page.waitForSelector('#main')
 
             let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
                 // add filter if any exist
@@ -23,6 +23,7 @@ const scraperObject = {
                 return links;
             });
 
+            //console.log(urls);
             return urls;
         }
 
@@ -48,7 +49,7 @@ const scraperObject = {
                         await page.click('.desc > a');
 
                         pageURLS.push(page.url());
-                        console.log("Page URL: " + page.url())
+                        //console.log("Page URL: " + page.url())
                     }
                 }
             }
@@ -58,20 +59,27 @@ const scraperObject = {
 
         const addItems = async (urls) => {
             let items = [];
-            for(pageUrl in urls) {
-                const itemInAPage = getAllItemURLFromAPage(pageUrl);
+            for(pageUrl of urls) {
+                const itemInAPage = await getAllItemURLFromAPage(pageUrl);
+                //console.log(itemInAPage.leanth);
                 items.push(...itemInAPage);
             }
             return items;
         }
 
+        const getTotalAdsCount = (items) => {
+            console.log("Item count for the initial URL: " + items.length)
+        }
+
         const allPagesURLs = await getNextPageUrl(page, 10)
-        console.log(allPagesURLs);
+        //console.log(allPagesURLs);
         
         const allItems = await addItems(allPagesURLs);
-        console.log(allItems);
+        //console.log(allItems);
 
-        async function scrapeCurrentPage(){
+        getTotalAdsCount(allItems);
+
+        const scrapeCarItem = async () => {
 
             // Wait for the required DOM to be rendered
             await page.waitForSelector('#main');
