@@ -20,7 +20,7 @@ Get the project
 
 
 # Run scripy
-- `npm run start'
+- `npm run start`
 
 
 # Deploy to cloud
