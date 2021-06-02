@@ -1,5 +1,7 @@
+const { Configuration } = require("./configuration");
+
 const scraperObject = {
-    url: 'https://www.imdb.com/search/title/?groups=top_100&sort=user_rating,desc',
+    url: Configuration.URL,
     async scraper(browser){
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url}...`);
@@ -9,6 +11,8 @@ const scraperObject = {
         let scrapedData = [];
 
         const getAllLinksFromAPage = async (page) => {
+           let item = await page.waitForSelector('#main')
+
             let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
                 // add filter if any exist
                 // links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
@@ -24,7 +28,7 @@ const scraperObject = {
         const getNextPageUrls = async (page, pageCount) => {
             let allUrls = []
             let urls = await getAllLinksFromAPage(page);
-            // console.log(urls);
+            console.log(urls.length);
           
             allUrls.push(...urls);
             
@@ -34,7 +38,7 @@ const scraperObject = {
                 for (let i = 0; i < pageCount ; i++) {
                     let nextButtonExist = false;
                     try {
-                        const nextButton = await page.$eval('.desc > a', a => a.textContent);
+                        const nextButton = await page.$eval('.desc > a.next-page', a => a.textContent);
                         nextButtonExist = true;
                     } catch (error) {
                         nextButtonExist = false;
@@ -44,9 +48,10 @@ const scraperObject = {
                     if (nextButtonExist) {
                         await page.click('.desc > a');
                         // return scrapeCurrentPage();
-                        console.log('hellloo');
+
+                        console.log("Main " + page.url())
                         urls = await getAllLinksFromAPage(page);
-                        console.log('urls' + urls)
+                        console.log('urls ' + urls.length)
                         allUrls.push(...urls);
                     
                     }
