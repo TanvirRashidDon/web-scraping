@@ -7,6 +7,9 @@ const scraperObject = {
         await page.goto(this.url);
 
         let scrapedData = [];
+        let allUrls = [];
+
+        
 
         async function scrapeCurrentPage(){
 
@@ -14,8 +17,7 @@ const scraperObject = {
             await page.waitForSelector('#main');
 
             // Get the link to all the links
-            let urls = await getAllLinksFromAPage(page);
-            // console.log(urls);
+            availableUrls = getNextPageUrls(page, 10)
 
             let pagePromise = (link) => new Promise(async(resolve, reject) => {
                 let dataObj = {};
@@ -43,7 +45,7 @@ const scraperObject = {
                 await newPage.close();
             })
 
-            for(link in urls){
+            for(link in availableUrls){
                 let currentPageData = await pagePromise(urls[link]);
                 scrapedData.push(currentPageData);
                 // console.log(currentPageData);
@@ -51,22 +53,45 @@ const scraperObject = {
 
             // When all the data on this page is done, click the next button and start the scraping of the next page
             // You are going to check if this button exist first, so you know if there really is a next page.
-            let nextButtonExist = false;
-            try {
-                const nextButton = await page.$eval('.desc > a', a => a.textContent);
-                nextButtonExist = true;
-            } catch (error) {
-                nextButtonExist = false;
-            }
-
-            if (nextButtonExist) {
-                await page.click('.desc > a');
-                return scrapeCurrentPage();
-            }
+           
+            console.log(urls)
             await page.close();
+
             return scrapedData;
         }
 
+        const getNextPageUrls = async (page, pageCount) => {
+            
+            let allUrls = []
+            let urls = await getAllLinksFromAPage(page);
+            // console.log(urls);
+          
+            allUrls.push(urls);
+            
+            if (pageCount <= 0) {
+                return allUrls;
+            } else {
+                for (let i = 0; i < pageCount; i++) {
+                    let nextButtonExist = false;
+                    try {
+                        const nextButton = await page.$eval('.desc > a', a => a.textContent);
+                        nextButtonExist = true;
+                    } catch (error) {
+                        nextButtonExist = false;
+                    }
+
+                    if (nextButtonExist) {
+                        await page.click('.desc > a');
+                        // return scrapeCurrentPage();
+                        urls = await getAllLinksFromAPage(page);
+                        allUrls.push(urls);
+                    
+                    }
+                }
+            }
+            return allUrls;
+            
+        }
         const getAllLinksFromAPage = async (page) => {
             let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
                 // add filter if any exist
