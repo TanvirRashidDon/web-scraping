@@ -12,14 +12,9 @@ const scraperObject = {
 
             // Wait for the required DOM to be rendered
             await page.waitForSelector('#main');
-            // Get the link to all the required books
-            let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
-                // Make sure the book to be scraped is in stock
-                // links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
-                // Extract the links from the data
-                links = links.map(el => el.querySelector('h3 > a').href)
-                return links;
-            });
+
+            // Get the link to all the links
+            let urls = await getAllLinksFromAPage(page);
             // console.log(urls);
 
             let pagePromise = (link) => new Promise(async(resolve, reject) => {
@@ -70,6 +65,18 @@ const scraperObject = {
             }
             await page.close();
             return scrapedData;
+        }
+
+        const getAllLinksFromAPage = async (page) => {
+            let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
+                // add filter if any exist
+                // links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
+                // Extract the links from the data
+                links = links.map(el => el.querySelector('h3 > a').href)
+                return links;
+            });
+
+            return urls;
         }
 
         let data = await scrapeCurrentPage();
