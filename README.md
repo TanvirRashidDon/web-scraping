@@ -13,14 +13,14 @@ Get the project
 - `git clone ......`
 - `cd scraping-task`
 
-Install depenencies 
+## Install depenencies 
 
 - `npm install request-promise request cheerio json2csv`
 - `npm install --save puppeteer`
 
 
 # Run scripy
-- `node index.js'
+- `npm run start'
 
 
 # Deploy to cloud

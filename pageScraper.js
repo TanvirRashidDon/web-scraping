@@ -23,15 +23,15 @@ const scraperObject = {
             await newPage.goto(link);
 
             dataObj['title'] = await newPage.$eval('h1', text => text.textContent);
-            // dataObj['year'] = await newPage.$eval('h1', (text) => {
-            //     // Strip new line and tab spaces
-            //     text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
-            //     // Get the year
-            //     let regexp = /^.*\((.*)\).*$/i;
-            //     let year = regexp.exec(text)[1].split(' ')[0];
+            dataObj['year'] = await newPage.$eval('h1', (text) => {
+                // Strip new line and tab spaces
+                // text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
+                // Get the year
+                let regexp = /^.*\((.*)\).*$/i;
+                let year = regexp.exec(text.textContent)[1].split(' ')[0];
 
-            //     return year;
-            // });
+                return year;
+            });
             dataObj['director'] = await newPage.$eval('div > ul > li > a', (text) => {          
                 // Strip new line and tab spaces
                 text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
