@@ -1,10 +1,10 @@
 const { Configuration } = require("./configuration");
 
 const scraperObject = {
-    url: Configuration.URL,
+    url: Configuration.initialURL,
     async scraper(browser){
         let page = await browser.newPage();
-        console.log(`Navigating to ${this.url}...`);
+        console.log(`Navigating to base url ${this.url}...`);
         // Navigate to the selected page
         await page.goto(this.url);
 
@@ -25,13 +25,10 @@ const scraperObject = {
         }
 
         // Get Next page url call
-        const getNextPageUrls = async (page, pageCount) => {
-            let allUrls = []
-            let urls = await getAllLinksFromAPage(page);
-            console.log(urls.length);
-          
-            allUrls.push(...urls);
-            
+        const getNextPageUrl = async (page, pageCount) => {
+            let pageURLS = []
+            pageURLS.push(this.url);
+                      
             if (pageCount <= 0) {
                 return allUrls;
             } else {
@@ -47,22 +44,18 @@ const scraperObject = {
 
                     if (nextButtonExist) {
                         await page.click('.desc > a');
-                        // return scrapeCurrentPage();
 
-                        console.log("Main " + page.url())
-                        urls = await getAllLinksFromAPage(page);
-                        console.log('urls ' + urls.length)
-                        allUrls.push(...urls);
-                    
+                        pageURLS.push(page.url());
+                        console.log("Page URL: " + page.url())
                     }
                 }
             }
 
-            return allUrls;
+            return pageURLS;
         }
 
-        let allUrls = await getNextPageUrls(page, 10)
-        console.log(allUrls.length);
+        const allPagesURLs = await getNextPageUrl(page, 10)
+        console.log(allPagesURLs);
 
         async function scrapeCurrentPage(){
 
