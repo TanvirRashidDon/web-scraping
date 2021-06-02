@@ -10,8 +10,10 @@ const scraperObject = {
 
         let scrapedData = [];
 
-        const getAllLinksFromAPage = async (page) => {
-           let item = await page.waitForSelector('#main')
+        const getAllItemURLFromAPage = async (url) => {
+            await page.goto(url);
+
+            let item = await page.waitForSelector('#main')
 
             let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
                 // add filter if any exist
@@ -54,8 +56,20 @@ const scraperObject = {
             return pageURLS;
         }
 
+        const addItems = async (urls) => {
+            let items = [];
+            for(pageUrl in urls) {
+                const itemInAPage = getAllItemURLFromAPage(pageUrl);
+                items.push(...itemInAPage);
+            }
+            return items;
+        }
+
         const allPagesURLs = await getNextPageUrl(page, 10)
         console.log(allPagesURLs);
+        
+        const allItems = await addItems(allPagesURLs);
+        console.log(allItems);
 
         async function scrapeCurrentPage(){
 
