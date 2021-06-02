@@ -6,7 +6,7 @@ const scraperObject = {
         // Navigate to the selected page
         await page.goto(this.url);
         // Wait for the required DOM to be rendered
-        await page.waitForSelector('.article');
+        await page.waitForSelector('#main');
         // Get the link to all the required books
         let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
             // Make sure the book to be scraped is in stock
@@ -15,7 +15,38 @@ const scraperObject = {
             links = links.map(el => el.querySelector('h3 > a').href)
             return links;
         });
-        console.log(urls);
+        // console.log(urls);
+
+        let pagePromise = (link) => new Promise(async(resolve, reject) => {
+            let dataObj = {};
+            let newPage = await browser.newPage();
+            await newPage.goto(link);
+
+            dataObj['title'] = await newPage.$eval('h1', text => text.textContent);
+            // dataObj['year'] = await newPage.$eval('h1', (text) => {
+            //     // Strip new line and tab spaces
+            //     text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
+            //     // Get the year
+            //     let regexp = /^.*\((.*)\).*$/i;
+            //     let year = regexp.exec(text)[1].split(' ')[0];
+
+            //     return year;
+            // });
+            dataObj['director'] = await newPage.$eval('div > ul > li > a', (text) => {          
+                // Strip new line and tab spaces
+                text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
+                return text;
+            });
+            
+            resolve(dataObj);
+            await newPage.close();
+        })
+
+        for(link in urls){
+            let currentPageData = await pagePromise(urls[link]);
+            // scrapedData.push(currentPageData);
+            console.log(currentPageData);
+        }
     }
 }
 
