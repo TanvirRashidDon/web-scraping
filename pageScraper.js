@@ -2,9 +2,12 @@ const { Configuration } = require("./configuration");
 
 const scraperObject = {
     url: Configuration.initialURL,
+    headers: Configuration.headers,
     async scraper(browser){
         const getAllItemURLFromAPage = async (url) => {
             // go to the page and wait till the loadin completed
+            // pass headers
+            await page.setExtraHTTPHeaders(this.headers);
             await page.goto(url);
             await page.waitForSelector('#main')
 
@@ -67,26 +70,28 @@ const scraperObject = {
         const scrapeCarItems = async (urls) => {
             let scrapedData = [];
 
+            const findElement = async (page, tag) => {
+                let text = "";
+
+                try {
+                    text = await page.$eval(tag, text => text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, ""));
+                } catch (error) {
+                    text = "";
+                }
+                return text;
+            }
+
             let pagePromise = (link) => new Promise(async(resolve, reject) => {
                 let dataObj = {};
                 let newPage = await browser.newPage();
+
+                await newPage.setExtraHTTPHeaders(this.headers);
+                //console.log(this.headers)
                 await newPage.goto(link);
+                //console.log(newPage.url());
 
-                dataObj['title'] = await newPage.$eval('h1', text => text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, ""));
-                dataObj['year'] = await newPage.$eval('h1', (text) => {
-                    // Strip new line and tab spaces
-                    // text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
-                    // Get the year
-                    let regexp = /^.*\((.*)\).*$/i;
-                    let year = regexp.exec(text.textContent)[1].split(' ')[0];
-
-                    return year;
-                });
-                dataObj['director'] = await newPage.$eval('div > ul > li > a', (text) => {          
-                    // Strip new line and tab spaces
-                    text = text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, "");
-                    return text;
-                });
+                dataObj['title'] = await findElement(newPage, 'h1');
+                
                 
                 resolve(dataObj);
                 console.log(dataObj);
@@ -106,18 +111,21 @@ const scraperObject = {
 
         // =================== Start Here =================
         let page = await browser.newPage();
-        console.log(`Navigating to initial url ${this.url}\n`);
+        //console.log(`Navigating to initial url ${this.url}\n`);
         // Navigate to the selected page
+        await page.setExtraHTTPHeaders(this.headers);
         await page.goto(this.url);
 
-        const allPagesURLs = await getNextPageUrl(page, 10)
+        //const allPagesURLs = await getNextPageUrl(page, 10)
         //console.log(allPagesURLs);
         
-        const allItems = await addItems(allPagesURLs);
+        //const allItems = await addItems(allPagesURLs);
         //console.log(allItems);
 
-        getTotalAdsCount(allItems);
+        //getTotalAdsCount(allItems);
 
+        let allItems = [];
+        allItems.push("https://suchen.mobile.de/fahrzeuge/details.html?id=311936755&damageUnrepaired=NO_DAMAGE_UNREPAIRED&isSearchRequest=true&makeModelVariant1.makeId=25200&makeModelVariant1.modelGroupId=29&pageNumber=1&scopeId=C&sfmr=false&action=topOfPage&top=1:1&searchId=aac6c1a7-59f9-b260-ab8b-cd9ccc9c731b");
         const scrapedData = await scrapeCarItems(allItems);
         await page.close();
 
