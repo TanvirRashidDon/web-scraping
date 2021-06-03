@@ -75,8 +75,10 @@ const scraperObject = {
 
                 try {
                     text = await page.$eval(tag, text => text.textContent.replace(/(\r\n\t|\n|\r|\t)/gm, ""));
+                // text = await page.$eval(tag, text => text.textContent);
+
                 } catch (error) {
-                    text = "";
+                    text = "None";
                 }
                 return text;
             }
@@ -90,11 +92,68 @@ const scraperObject = {
                 await newPage.goto(link);
                 //console.log(newPage.url());
 
-                dataObj['title'] = await findElement(newPage, 'h1');
+                dataObj['title'] = await findElement(newPage, '#rbt-ad-title');
+               // dataObj['price'] = await findElement(newPage, '#rbt-pt-v > span');
+                 //dataObj['gross'] = await findElement(newPage, 'body > div.viewport > div > div:nth-child(2) > div:nth-child(5) > div.g-col-8 > div.cBox.cBox--content.cBox--vehicle-details.u-overflow-inherit.u-margin-top-225 > div.cBox-body.cBox-body--title-area.u-margin-bottom-9 > div:nth-child(1) > div.g-col-5.right-aligned > span.h3.rbt-prime-price');
+               dataObj['netprice'] = await findElement(newPage, 'div.cBox-body.cBox-body--title-area.u-margin-bottom-9 > div:nth-child(1) > div.g-col-5.right-aligned > span.rbt-sec-price');//
+               dataObj['gross'] = await findElement(newPage, 'span.h3.rbt-prime-price');
+               dataObj['vat'] = await findElement(newPage, 'body > div.viewport > div > div:nth-child(2) > div:nth-child(5) > div.g-col-8 > div.cBox.cBox--content.cBox--vehicle-details.u-overflow-inherit.u-margin-top-225 > div.cBox-body.cBox-body--title-area.u-margin-bottom-9 > div:nth-child(1) > div.g-col-5.right-aligned > span.rbt-vat.u-margin-top-9');
+               dataObj['catagory'] = await findElement(newPage, '#rbt-category-l');
+               dataObj['milage'] = await findElement(newPage, '#rbt-mileage-v'); 
+               dataObj['capacity'] = await findElement(newPage, '#rbt-cubicCapacity-v');
+               dataObj['power'] = await findElement(newPage, '#rbt-power-v');
+               dataObj['fuelType'] = await findElement(newPage, '#rbt-fuel-v');
+               dataObj['hu'] = await findElement(newPage, '#rbt-hu-v');
+               dataObj['transmission'] = await findElement(newPage, '#rbt-transmission-v');
+
+               dataObj['consumption'] = await findElement(newPage, '#rbt-envkv\\.consumption-v> div:nth-child(1)');
+               dataObj['consumption_urban'] = await findElement(newPage, '#rbt-envkv\\.consumption-v> div:nth-child(2)');
+               dataObj['consumption_extra'] = await findElement(newPage, '#rbt-envkv\\.consumption-v> div:nth-child(3)');
+              
+               dataObj['co2Emmission'] = await findElement(newPage, '#rbt-envkv\\.emission-v');
+               dataObj['numberOfSeats'] = await findElement(newPage, '#rbt-numSeats-v');
+               dataObj['numberOfOwnersOfTheVehicle'] = await findElement(newPage, '#rbt-numberOfPreviousOwners-v');
+               dataObj['emissionClass'] = await findElement(newPage, '#rbt-emissionClass-v');
+               dataObj['emissionsSticker'] = await findElement(newPage, '#rbt-emissionsSticker-v');
+               dataObj['numberOfDoors'] = await findElement(newPage, '##rbt-doorCount-v');
+               dataObj['vehicleNumber'] = await findElement(newPage, '#rbt-sku-v');
+               dataObj['Airbags'] = await findElement(newPage, '#rbt-airbag-v');
+               dataObj['park_sensors'] = await findElement(newPage, '#rbt-parkAssists-v');
+               dataObj['condition'] = await findElement(newPage, '#rbt-damageCondition-v');
+               dataObj['firstRegistration'] = await findElement(newPage, '#rbt-firstRegistration-v');address
+               
+               dataObj['seller'] = await findElement(newPage, '#dealer-hp-link-bottom > b > font > font');
+               dataObj['address'] = await findElement(newPage, '#rbt-db-address');
+               dataObj['source_id'] = await findElement(newPage, 'body > div.viewport > div > div:nth-child(2) > div:nth-child(3) > div > div > ol > li:nth-child(4) > font > font');address
+            //    dataObj['firstRegistration'] = await findElement(newPage, '#rbt-firstRegistration-v');address
+            //    dataObj['firstRegistration'] = await findElement(newPage, '#rbt-firstRegistration-v');address
+
+            //     // 
+            //     //  
+            //     // dataObj['availability'] = await findElement(newPage, '#rbt-availability-v');
+            //     // dataObj['condition'] = await findElement(newPage, '#rbt-damageCondition-v');
+                
+            //     // 
+            //     // dataObj['origin'] = await findElement(newPage, '#rbt-countryVersion-v');
+            //     // 
+            //     // 
+            //     // dataObj['consumption'] = await findElement(newPage, '#rbt-envkv\\.consumption-v');
+            //     // 
+            //     // 
+            //     // 
+            //     // dataObj['environmental'] = await findElement(newPage, '#rbt-emissionsSticker-v');
+            //     // 
+            //     // 
+            //     // 
+            //     // dataObj['ColorManufacturer'] = await findElement(newPage, '#rbt-manufacturerColorName-v');
+            //     // dataObj['colourSchwarz'] = await findElement(newPage, '#rbt-color-v');
+            //     // dataObj['interiorFittings'] = await findElement(newPage, '#rbt-interior-v');
+            //     // 
+
                 
                 
                 resolve(dataObj);
-                console.log(dataObj);
+                //console.log(dataObj);
                 await newPage.close();
             })
 
