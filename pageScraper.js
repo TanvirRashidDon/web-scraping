@@ -3,19 +3,22 @@ const { Configuration } = require("./configuration");
 const scraperObject = {
     url: Configuration.initialURL,
     headers: Configuration.headers,
+    pageCount: Configuration.pageCount,
     async scraper(browser){
         const getAllItemURLFromAPage = async (url) => {
             // go to the page and wait till the loadin completed
             // pass headers
             await page.setExtraHTTPHeaders(this.headers);
             await page.goto(url);
-            await page.waitForSelector('#main')
+            await page.waitForTimeout(5000);
 
-            let urls = await page.$$eval('#main > div > div.lister.list.detail.sub-list > div > div > div.lister-item-content', links => {
+            let urls = await page.$$eval('body > div.viewport > div > div > div > div.g-col-9 > div.cBox.cBox--content.cBox--resultList > div > a > div > div.g-col-9 > div.resultitem-bottom-row > div > div > div > div.u-pull-right.u-margin-right-9 > span', links => {
                 // add filter if any exist (example below)
                 // links = links.filter(link => link.querySelector('.instock.availability > i').textContent !== "In stock")
                 // Extract the links from the data
-                links = links.map(el => el.querySelector('h3 > a').href)
+                console.log(links);
+                links = links.map(el => el.querySelector('.cBox-body.cBox-body--topResultitem.dealerAd.rbt-top > a').data-ad-id)
+                console.log(links);
                 return links;
             });
 
@@ -28,26 +31,13 @@ const scraperObject = {
             let pageURLS = []
             pageURLS.push(this.url);
                       
-            if (pageCount <= 0) {
-                return allUrls;
-            } else {
-                for (let i = 0; i < pageCount ; i++) {
-                    let nextButtonExist = false;
-                    try {
-                        const nextButton = await page.$eval('.desc > a.next-page', a => a.textContent);
-                        nextButtonExist = true;
-                    } catch (error) {
-                        nextButtonExist = false;
-                        break;
-                    }
+            let nextPageIterator = 2;
+            for (let i = 0; i < pageCount && nextPageIterator < 51; i++) {
+                let url = 'https://suchen.mobile.de/fahrzeuge/search.html?damageUnrepaired=NO_DAMAGE_UNREPAIRED&isSearchRequest=true&makeModelVariant1.makeId='
+                 + '25200&makeModelVariant1.modelGroupId=29&pageNumber=' + nextPageIterator +'&scopeId=C&sfmr=false'
 
-                    if (nextButtonExist) {
-                        await page.click('.desc > a');
-
-                        pageURLS.push(page.url());
-                        //console.log("Page URL: " + page.url())
-                    }
-                }
+                pageURLS.push(url);
+                nextPageIterator++;
             }
 
             return pageURLS;
@@ -125,32 +115,7 @@ const scraperObject = {
                dataObj['seller'] = await findElement(newPage, '#dealer-hp-link-bottom > b > font > font');
                dataObj['address'] = await findElement(newPage, '#rbt-db-address');
                dataObj['source_id'] = await findElement(newPage, 'body > div.viewport > div > div:nth-child(2) > div:nth-child(3) > div > div > ol > li:nth-child(4) > font > font');address
-            //    dataObj['firstRegistration'] = await findElement(newPage, '#rbt-firstRegistration-v');address
-            //    dataObj['firstRegistration'] = await findElement(newPage, '#rbt-firstRegistration-v');address
-
-            //     // 
-            //     //  
-            //     // dataObj['availability'] = await findElement(newPage, '#rbt-availability-v');
-            //     // dataObj['condition'] = await findElement(newPage, '#rbt-damageCondition-v');
-                
-            //     // 
-            //     // dataObj['origin'] = await findElement(newPage, '#rbt-countryVersion-v');
-            //     // 
-            //     // 
-            //     // dataObj['consumption'] = await findElement(newPage, '#rbt-envkv\\.consumption-v');
-            //     // 
-            //     // 
-            //     // 
-            //     // dataObj['environmental'] = await findElement(newPage, '#rbt-emissionsSticker-v');
-            //     // 
-            //     // 
-            //     // 
-            //     // dataObj['ColorManufacturer'] = await findElement(newPage, '#rbt-manufacturerColorName-v');
-            //     // dataObj['colourSchwarz'] = await findElement(newPage, '#rbt-color-v');
-            //     // dataObj['interiorFittings'] = await findElement(newPage, '#rbt-interior-v');
-            //     // 
-
-                
+                            
                 
                 resolve(dataObj);
                 //console.log(dataObj);
@@ -170,26 +135,23 @@ const scraperObject = {
 
         // =================== Start Here =================
         let page = await browser.newPage();
-        //console.log(`Navigating to initial url ${this.url}\n`);
+        console.log(`Navigating to initial url ${this.url}\n`);
         // Navigate to the selected page
         await page.setExtraHTTPHeaders(this.headers);
         await page.goto(this.url);
 
-        //const allPagesURLs = await getNextPageUrl(page, 10)
-        //console.log(allPagesURLs);
+        const allPagesURLs = await getNextPageUrl(page, this.pageCount)
+        console.log(allPagesURLs);
         
-        //const allItems = await addItems(allPagesURLs);
-        //console.log(allItems);
+        const allItems = await addItems(allPagesURLs);
+        console.log(allItems);
 
         //getTotalAdsCount(allItems);
 
-        let allItems = [];
-        allItems.push("https://suchen.mobile.de/fahrzeuge/details.html?id=311936755&damageUnrepaired=NO_DAMAGE_UNREPAIRED&isSearchRequest=true&makeModelVariant1.makeId=25200&makeModelVariant1.modelGroupId=29&pageNumber=1&scopeId=C&sfmr=false&action=topOfPage&top=1:1&searchId=aac6c1a7-59f9-b260-ab8b-cd9ccc9c731b");
-        const scrapedData = await scrapeCarItems(allItems);
+        //const scrapedData = await scrapeCarItems(allItems);
         await page.close();
 
-        console.log(scrapedData);
-        // return data;
+        //console.log(scrapedData);
     }
 }
 

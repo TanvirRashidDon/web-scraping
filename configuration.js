@@ -1,5 +1,6 @@
  Configuration = {
     initialURL : "https://suchen.mobile.de/fahrzeuge/search.html?dam=0&isSearchRequest=true&ms=25200;;29&sfmr=false&vc=Car",
+    pageCount : 1,
     headers : {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
         "accept-encoding": "gzip, deflate, br",

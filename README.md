@@ -23,5 +23,6 @@ Get the project
 - `npm run start`
 
 
-# Deploy to cloud
+# Deploy to cloud/production
 - set headless = true in browser.js file
+
